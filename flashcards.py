@@ -26,7 +26,7 @@ class fstack():
             print("There are no cards in the stack yet!")
         else:
             for i,card in enumerate(self.lst):
-                print("{:5s} {:60s}\t{:120s}".format(str(i+1) + ".", card.word, card.defn))
+                print("{:6s}{:60s}\t{:120s}".format(str(i+1) + ".", card.word, card.defn))
     def remove_card(self, idx): # Not safe - assumes card index exists
         self.lst.pop(idx-1)
     def edit_card(self, idx, new): # Not safe - assumes card index exists
@@ -95,7 +95,10 @@ def flashcard_main(stack, filename):
             else:
                 print("Invalid card number!")
         elif option == 't':
-            test_stack(stack)
+            if stack.lst == []:
+                print("Cannot test on empty deck!")
+            else:
+                test_stack(stack)
         elif option == 's':
             print("Saving file...")
             write_to_file(stack, filename)
@@ -144,15 +147,18 @@ def write_stack(stack, filename):
 
 def test_stack(stack):
     correct = 0
+    testlist = stack.lst
+    print(testlist)
     if yes_or_no("Do you want to be tested in a random order?"):
-        testlist = stack.lst
         random.shuffle(testlist)
     else:
-        testlist = stack.lst
+        if yes_or_no("Do you want to be tested in alphabetical order?"):
+            testlist = sorted(testlist, key=lambda stack: stack.word)
     if yes_or_no("Do you want to switch items and answers?"):
         switch = True
     else:
         switch = False
+    print(testlist)
     for card in testlist:
         print(("Item" if switch else "Answer") + " for " + (card.defn if switch else card.word))
         userans = input()
@@ -168,7 +174,9 @@ def test_stack(stack):
 # Returns True if yes, and False if no.  Any string not beginning with 'y' will be a no
 def yes_or_no(string):
     option = input(string + " (y/n) ")
-    if option[0].lower() == 'y':
+    if option == "":
+        return False
+    elif option[0].lower() == 'y':
         return True
     else:
         return False
